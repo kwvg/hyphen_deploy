@@ -43,7 +43,10 @@
       ];
       kernelModules = [ "zfs" ];
     };
-    kernelParams = [ "zfs.zfs_arc_max=${toString (24 * 1024 * 1024 * 1024)}" ];
+    kernelParams = [
+      "zfs.zfs_arc_max=${toString (24 * 1024 * 1024 * 1024)}"
+      "delayacct"
+    ];
     loader.grub.enable = true;
     supportedFilesystems = [ "zfs" ];
     swraid = {
@@ -66,9 +69,20 @@
     fishPlugins.bobthefish
     git
     htop
+    iotop
     nano
+    postgresql_18
+    rar
+    rsync
     rustup
+    tmux
+    zstd
   ];
+  nixpkgs.config.allowUnfreePredicate =
+    pkg:
+    builtins.elem (lib.getName pkg) [
+      "rar"
+    ];
   programs.fish = {
     enable = true;
     interactiveShellInit = ''
@@ -108,7 +122,7 @@
   };
   security.sudo.wheelNeedsPassword = false;
 
-  # SSH
+  # Services
   services.openssh = {
     enable = true;
     settings = {
@@ -117,6 +131,7 @@
       KbdInteractiveAuthentication = false;
     };
   };
+  services.postgresql.enable = false;
 
   # No swap
   swapDevices = [ ];

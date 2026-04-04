@@ -31,6 +31,7 @@
             nixpkgs.overlays = [
               (_final: _prev: {
                 cloudflared = unstable.cloudflared;
+                postgresql_18 = unstable.postgresql_18;
               })
             ];
           }
