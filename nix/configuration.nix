@@ -137,9 +137,24 @@
   # No swap
   swapDevices = [ ];
 
+  system.activationScripts.docker-buildx =
+    let
+      buildxVersion = "0.21.2";
+      buildxUrl = "https://github.com/docker/buildx/releases/download/v${buildxVersion}/buildx-v${buildxVersion}.linux-amd64";
+      dest = "/opt/docker-buildx";
+    in
+    ''
+      if [ ! -f ${dest} ] || ! ${dest} version 2>/dev/null | grep -q "${buildxVersion}"; then
+        mkdir -p $(dirname ${dest})
+        ${pkgs.curl}/bin/curl -fsSL -o ${dest} ${buildxUrl}
+        chmod +x ${dest}
+      fi
+    '';
+
   # Docker with overlay2 to avoid trashing ZFS
   virtualisation.docker = {
     enable = true;
+    enableOnBoot = true;
     storageDriver = "overlay2";
     daemon.settings = {
       no-new-privileges = true;
@@ -158,6 +173,7 @@
     volumes = [
       "/home/smolt:/home/smolt"
       "/home/smolt/data/portainer:/data"
+      "/opt/docker-buildx:/usr/local/lib/docker/cli-plugins/docker-buildx:ro"
       "/var/run/docker.sock:/var/run/docker.sock"
     ];
   };
