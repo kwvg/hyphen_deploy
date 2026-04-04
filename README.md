@@ -30,6 +30,38 @@ Things you should know:
 
 * The default shell is `fish`. I like fish. 🐟
 
+### Tunnels
+
+We use Cloudflare Zero Trust to protect SSH. During initial setup, make sure you _don't_ close the
+direct port 22 access without first confirming the portal works. You do _not_ need WARP,
+`cloudflared` on the client-side is sufficient with an entry like this in `~/.ssh/config`
+
+> [!NOTE]
+> Adjust `ProxyCommand` to your install path, use `whereis cloudflared`, the path below is for Apple
+> Silicon Macs.
+
+```
+Host salmon
+  HostName ssh.example.com
+  User username
+  IdentitiesOnly yes
+  IdentityFile ~/.ssh/id_ed25519
+  ProxyCommand /opt/homebrew/opt/cloudflared/bin/cloudflared access ssh --hostname %h
+```
+
+* Make sure the following are true
+  * Your email is **allowlisted** for connecting to this application
+  * If using inclusion mode, the following domains are allowlisted
+
+    ```
+    *.cloudflareaccess.com
+    [ssh subdomain].[your domain name].tld
+    ```
+
+  * Bot Fight Mode is **disabled** for the associated zone (i.e. domain)
+  * WebSockets is **enabled** for the associated zone
+  * Browser rendering for SSH is **enabled** for the Cloudflare Zero Trust application
+
 ### Directories
 
 * `nix`: Should be symlinked to `/etc/nixos`, NixOS configuration for Hetzner instance used for

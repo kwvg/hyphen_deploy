@@ -136,7 +136,7 @@
 
   # Firewall
   networking.firewall = {
-    allowedTCPPorts = lib.mkDefault [ 22 ];
-    allowedUDPPorts = [ ];
+    allowedTCPPorts = lib.mkForce [ ];
+    allowedUDPPorts = lib.mkForce [ ];
   };
 }

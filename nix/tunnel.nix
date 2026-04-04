@@ -14,6 +14,20 @@
 }:
 
 {
+  # Bind SSH to localhost only, accessed via Cloudflare Tunnel
+  services.openssh = {
+    listenAddresses = [
+      {
+        addr = "127.0.0.1";
+        port = 22;
+      }
+      {
+        addr = "::1";
+        port = 22;
+      }
+    ];
+  };
+
   services.cloudflared = {
     enable = true;
     tunnels.salmon = {
