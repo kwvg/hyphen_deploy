@@ -5,12 +5,14 @@
 # - The version of Rust deployed is NOT pinned, `rustup` will let you select your toolchain
 
 {
+  lib,
   pkgs,
   ...
 }:
 
 {
   imports = [
+    ./anssi.nix
     ./disko-config.nix
     ./hetzner.nix
   ];
@@ -131,5 +133,8 @@
   };
 
   # Firewall
-  networking.firewall.allowedTCPPorts = [ 22 ];
+  networking.firewall = {
+    allowedTCPPorts = lib.mkDefault [ 22 ];
+    allowedUDPPorts = [ ];
+  };
 }
