@@ -1,0 +1,20 @@
+# syntax=docker/dockerfile:1
+
+FROM node:24-bookworm-slim AS builder
+
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+WORKDIR /src
+
+COPY --from=src package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc .nvmrc /src/
+COPY --from=src app/ /src/app
+COPY --from=src contrib/ /src/contrib
+
+RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile
+
+RUN pnpm build
+
+FROM lscr.io/linuxserver/nginx:latest
+
+COPY --from=builder /src/app/webui/public /config/www/

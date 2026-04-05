@@ -1,0 +1,112 @@
+# syntax=docker/dockerfile:1
+
+# Managed through Portainer, kept here for reference only
+
+networks:
+  net-dash:
+    internal: false
+  net-db:
+    internal: true
+  net-api:
+    internal: true
+  net-web:
+    internal: false
+
+volumes:
+  data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/smolt/data
+
+services:
+  postgresql:
+    container_name: postgresql
+    image: postgres:18-trixie
+    mem_limit: 20g
+    environment:
+      - TZ=Etc/UTC
+      - POSTGRES_USER=smolt
+      - POSTGRES_PASSWORD=<SUPER-SECRET-PASSWORD-WAHOO-MAR10>
+      - POSTGRES_DB=hyphen
+    volumes:
+      - type: volume
+        source: data
+        target: /var/lib/postgresql
+        volume:
+          subpath: postgresql
+    networks:
+      - net-db
+    restart: unless-stopped
+
+  dashd:
+    container_name: dashd
+    build:
+      context: /home/smolt/docker
+      dockerfile: Dockerfile.dashd
+    mem_limit: 4g
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - type: volume
+        source: data
+        target: /config
+        volume:
+          subpath: dashd
+    networks:
+      - net-dash
+    restart: unless-stopped
+
+  hyphend:
+    container_name: hyphend
+    depends_on:
+      - dashd
+      - postgresql
+    build:
+      context: /home/smolt/docker
+      dockerfile: Dockerfile.hyphend
+      additional_contexts:
+        src: /home/smolt/src
+    mem_limit: 12g
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - type: volume
+        source: data
+        target: /config
+        volume:
+          subpath: hyphend
+    networks:
+      - net-dash
+      - net-db
+      - net-api
+    restart: unless-stopped
+
+  webui:
+    container_name: webui
+    depends_on:
+      - hyphend
+    build:
+      context: /home/smolt/docker
+      dockerfile: Dockerfile.webui
+      additional_contexts:
+        src: /home/smolt/src
+    mem_limit: 4g
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - /home/smolt/data/nginx/hyphen.conf:/config/nginx/site-confs/default.conf
+      - /home/smolt/data/nginx/include:/config/nginx/include
+    ports:
+      - 80:80
+    networks:
+      - net-api
+      - net-web
+    restart: unless-stopped

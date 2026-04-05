@@ -75,3 +75,6 @@ $RECYCLE.BIN/
 !.vscode/extensions.json
 !.vscode/*.code-snippets
 !*.code-workspace
+
+# User data
+src/

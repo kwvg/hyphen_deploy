@@ -1,0 +1,40 @@
+# syntax=docker/dockerfile:1
+
+FROM rust:1.93.1-bookworm AS builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        clang libclang-dev cmake g++ pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src
+
+COPY --from=src Cargo.toml Cargo.lock rust-toolchain.toml /src
+COPY --from=src schema/ /src/schema
+COPY --from=src pkgs/ /src/pkgs
+
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/src/target \
+    cargo build --release -p hyphend -p hyphen-tui && \
+    cp target/release/hyphend target/release/hyphen-tui /tmp/
+
+FROM ghcr.io/linuxserver/baseimage-ubuntu:noble
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /tmp/hyphend /tmp/hyphen-tui /usr/local/bin/
+
+RUN mkdir -p \
+      /etc/s6-overlay/s6-rc.d/svc-hyphend/dependencies.d \
+      /etc/s6-overlay/s6-rc.d/user/contents.d && \
+    echo "longrun" > /etc/s6-overlay/s6-rc.d/svc-hyphend/type && \
+    touch /etc/s6-overlay/s6-rc.d/svc-hyphend/dependencies.d/init-services && \
+    touch /etc/s6-overlay/s6-rc.d/user/contents.d/svc-hyphend && \
+    printf '#!/usr/bin/with-contenv bash\nexec s6-setuidgid abc hyphend --datadir=/config --loglevel 2 --logconsole > /proc/1/fd/1 2>&1\n' \
+      > /etc/s6-overlay/s6-rc.d/svc-hyphend/run && \
+    chmod +x /etc/s6-overlay/s6-rc.d/svc-hyphend/run
+
+EXPOSE 3080
+
+VOLUME /config

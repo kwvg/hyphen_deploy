@@ -62,8 +62,23 @@ Host salmon
   * WebSockets is **enabled** for the associated zone
   * Browser rendering for SSH is **enabled** for the Cloudflare Zero Trust application
 
+### PostgreSQL
+
+* As we are using PostgreSQL 18, the expected datadir is `postgresql/18/docker`, make sure the files
+  are located there. You may need to also run `ALTER DATABASE hyphen REFRESH COLLATION VERSION;` if
+  moving from a host with a different `glibc` version than the container (this also affects the
+  `postgres` and `template1` databases). 
+
 ### Directories
+
+* `docker`: Stores `Dockerfile`s based on [LinuxServer.io](https://docs.linuxserver.io/general/container-customization/)
+  images to ensure that we maintain proper permissions with the default user (`smolt` with PID and
+  UID 1000). We use this for all images except PostgreSQL, which uses the official image ([source](https://hub.docker.com/_/postgres))
+  and has the PID and UID 999, so remember to `chown -R 999:999 data/postgresql`.
 
 * `nix`: Should be symlinked to `/etc/nixos`, NixOS configuration for Hetzner instance used for
    deployment. Assumes Intel chip without architectural mitigations for Spectre/Meltdown, 64GB RAM
    and ~900GB of _usable_ storage.
+
+* `src`: Hosts the Hyphen monorepo with portioned copied by the containers to build binaries/dist
+  needed for deploying `webui` and `hyphend`.
