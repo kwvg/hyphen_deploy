@@ -56,6 +56,12 @@ services:
         target: /config
         volume:
           subpath: dashd
+    healthcheck:
+      test: ["CMD", "dash-cli", "-datadir=/config", "getblockchaininfo"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
     networks:
       - net-dash
     restart: unless-stopped
@@ -63,8 +69,10 @@ services:
   hyphend:
     container_name: hyphend
     depends_on:
-      - dashd
-      - postgresql
+      dashd:
+        condition: service_healthy
+      postgresql:
+        condition: service_started
     build:
       context: /home/smolt/docker
       dockerfile: Dockerfile.hyphend
