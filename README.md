@@ -1,5 +1,6 @@
 > [!WARNING]
-> Used in production environments. For internal use only. Unsuitable for public release.
+> Snapshot of configuration used in production. For review purposes only. No support or warranty is
+> made available for the contents therein nor are there guarantees of correctness.
 
 ## Deployment files for Hyphen
 
