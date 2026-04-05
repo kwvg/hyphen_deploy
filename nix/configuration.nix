@@ -15,6 +15,7 @@
     ./anssi.nix
     ./disko-config.nix
     ./hetzner.nix
+    ./tunnel.nix
   ];
 
   system.stateVersion = "25.05";
@@ -60,6 +61,7 @@
   environment.systemPackages = with pkgs; [
     backblaze-b2
     clang
+    cloudflared
     docker-compose
     fishPlugins.bobthefish
     git
