@@ -6,14 +6,13 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 
 WORKDIR /src
 
-COPY --from=src package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc .nvmrc /src/
-COPY --from=src app/ /src/app
-COPY --from=src contrib/ /src/contrib
-
-RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
-    pnpm install --frozen-lockfile
-
-RUN pnpm build
+RUN --mount=type=bind,from=src,target=/ctx \
+    --mount=type=cache,target=/root/.local/share/pnpm/store \
+    cp /ctx/package.json /ctx/pnpm-lock.yaml /ctx/pnpm-workspace.yaml /ctx/.npmrc /ctx/.nvmrc /src/ && \
+    cp -r /ctx/app /src/app && \
+    cp -r /ctx/contrib /src/contrib && \
+    pnpm install --frozen-lockfile && \
+    pnpm build
 
 FROM lscr.io/linuxserver/nginx:latest
 

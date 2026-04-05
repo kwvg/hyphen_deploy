@@ -8,12 +8,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /src
 
-COPY --from=src Cargo.toml Cargo.lock rust-toolchain.toml /src
-COPY --from=src schema/ /src/schema
-COPY --from=src pkgs/ /src/pkgs
-
-RUN --mount=type=cache,target=/usr/local/cargo/registry \
+RUN --mount=type=bind,from=src,target=/ctx \
+    --mount=type=cache,target=/usr/local/cargo/registry \
     --mount=type=cache,target=/src/target \
+    cp /ctx/Cargo.toml /ctx/Cargo.lock /ctx/rust-toolchain.toml /src/ && \
+    cp -r /ctx/schema /src/schema && \
+    cp -r /ctx/pkgs /src/pkgs && \
     cargo build --release -p hyphend -p hyphen-tui && \
     cp target/release/hyphend target/release/hyphen-tui /tmp/
 
