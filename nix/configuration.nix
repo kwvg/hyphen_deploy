@@ -134,6 +134,18 @@
     };
   };
 
+  # Portainer CE
+  virtualisation.oci-containers.backend = "docker";
+  virtualisation.oci-containers.containers.portainer = {
+    image = "portainer/portainer-ce:latest";
+    ports = [ "127.0.0.1:9000:9000" ];
+    volumes = [
+      "/home/smolt:/home/smolt"
+      "/home/smolt/data/portainer:/data"
+      "/var/run/docker.sock:/var/run/docker.sock"
+    ];
+  };
+
   # Firewall
   networking.firewall = {
     allowedTCPPorts = lib.mkForce [ ];

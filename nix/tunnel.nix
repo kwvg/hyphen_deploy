@@ -33,8 +33,10 @@
     tunnels.salmon = {
       credentialsFile = "/etc/cloudflared/credentials.json";
       default = "http_status:404";
+      # Remember to `cloudflared tunnel route dns salmon ssh.yourdomain.com` for every key here
       ingress = {
-        "<WISH-RIGHT-NOW>" = "ssh://localhost:22";
+        "<WISH-RIGHT-NOW>" = "tcp://localhost:22";
+        "<AIRPLANES-IN-THE-NIGHT-SKY>" = "http://localhost:9000";
       };
     };
   };
