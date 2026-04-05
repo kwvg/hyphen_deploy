@@ -1,0 +1,135 @@
+# General configuration
+#
+# - Remember to change your SSH key
+# - hetzner.nix needs to be updated on YOUR machine's specifics
+# - The version of Rust deployed is NOT pinned, `rustup` will let you select your toolchain
+
+{
+  pkgs,
+  ...
+}:
+
+{
+  imports = [
+    ./disko-config.nix
+    ./hetzner.nix
+  ];
+
+  system.stateVersion = "25.05";
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
+  programs.command-not-found.enable = false;
+  programs.nix-index = {
+    enable = true;
+    enableFishIntegration = true;
+  };
+
+  # Boot
+  boot = {
+    initrd = {
+      availableKernelModules = [
+        "ahci"
+        "md_mod"
+        "nvme"
+        "raid1"
+        "sd_mod"
+        "sr_mod"
+        "xhci_pci"
+      ];
+      kernelModules = [ "zfs" ];
+    };
+    kernelParams = [ "zfs.zfs_arc_max=${toString (24 * 1024 * 1024 * 1024)}" ];
+    loader.grub.enable = true;
+    supportedFilesystems = [ "zfs" ];
+    swraid = {
+      enable = true;
+      mdadmConf = "MAILADDR root";
+    };
+    zfs.devNodes = "/dev/disk/by-id";
+  };
+
+  # Locale and time
+  i18n.defaultLocale = "en_US.UTF-8";
+  time.timeZone = "UTC";
+
+  # Packages and shell
+  environment.systemPackages = with pkgs; [
+    backblaze-b2
+    clang
+    docker-compose
+    fishPlugins.bobthefish
+    git
+    htop
+    nano
+    rustup
+  ];
+  programs.fish = {
+    enable = true;
+    interactiveShellInit = ''
+      # bobthefish: beloglazov theme
+      set -g theme_color_scheme beloglazov
+      set -g theme_display_git yes
+      set -g theme_display_git_dirty yes
+      set -g theme_display_hostname ssh
+      set -g theme_display_user ssh
+      set -g theme_nerd_fonts no
+      set -g theme_powerline_fonts no
+    '';
+  };
+
+  # Users
+  users.users = {
+    root.hashedPassword = "!";
+    smolt = {
+      isNormalUser = true;
+      uid = 1000;
+      group = "smolt";
+      extraGroups = [
+        "wheel"
+        "docker"
+      ];
+      shell = pkgs.fish;
+      home = "/home/smolt";
+      openssh.authorizedKeys.keys = [
+        "<CAN-WE-PRETEND-THAT-AIRPLANES-IN-THE-NIGHT-SKY-ARE-LIKE-SHOOTING-STARS>"
+      ];
+    };
+  };
+  users.groups = {
+    smolt = {
+      gid = 1000;
+    };
+  };
+  security.sudo.wheelNeedsPassword = false;
+
+  # SSH
+  services.openssh = {
+    enable = true;
+    settings = {
+      PermitRootLogin = "no";
+      PasswordAuthentication = false;
+      KbdInteractiveAuthentication = false;
+    };
+  };
+
+  # No swap
+  swapDevices = [ ];
+
+  # Docker with overlay2 to avoid trashing ZFS
+  virtualisation.docker = {
+    enable = true;
+    storageDriver = "overlay2";
+    daemon.settings = {
+      no-new-privileges = true;
+      icc = true;
+      live-restore = true;
+      userland-proxy = true;
+      log-driver = "journald";
+    };
+  };
+
+  # Firewall
+  networking.firewall.allowedTCPPorts = [ 22 ];
+}

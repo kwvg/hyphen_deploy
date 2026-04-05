@@ -1,2 +1,37 @@
 > [!WARNING]
 > Used in production environments. For internal use only. Unsuitable for public release.
+
+## Deployment files for Hyphen
+
+These files are `scp`'ed/pushed to the running instance to deploy the Hyphen knowledge explorer and
+make rather explicit assumptions. We made some decisions that might age poorly (RAID0 zpool for the
+OS and data) so don't use these files unless you've read them at least twice.
+
+Things you should know:
+
+* Hetzner doesn't support UEFI booting, we are using GPT partitions with a 1MB partition for storing
+  MBR with `/boot` as an ext4 partition mirrored using mdadm (RAID1). This is the only thing that's mirrored.
+  The MBR is just duplicated and must be done manually if it is updated.
+
+* We assume that the drives are located at `/dev/nvme0n1` and `/dev/nvme1n1`, SMT has been disabled
+  so you only get 4 addressable threads instead of 8. Adjust your scripts accordingly.
+
+* To apply the Nix configuration, boot into the Hetzner recovery image (use Hetzner Robot to do that)
+  and run `nix run github:nix-community/nixos-anywhere -- --flake ./nix#salmon root@[ip-addr-here]`.
+  Yes, you will need to install Nix on your local system for this to work. macOS users should use
+  Determinate Systems' Nix ([source](https://docs.determinate.systems/determinate-nix/)).
+
+* When restoring this NixOS image, make sure you `passwd` `smolt` (the non-root user) because we
+  **DON'T** enable the root user (no single-user mode for you) and without `passwd`, you are locked
+  out of KVM and must chroot into the env using the rescue image.
+
+* `/tmp` is not executable, this causes problems when building packages with `cargo`, make a tmpdir
+  in `${HOME}` and then use `TMPDIR=/home/smolt/.tmp` (as an example) for writing calls to cargo.
+
+* The default shell is `fish`. I like fish. 🐟
+
+### Directories
+
+* `nix`: Should be symlinked to `/etc/nixos`, NixOS configuration for Hetzner instance used for
+   deployment. Assumes Intel chip without architectural mitigations for Spectre/Meltdown, 64GB RAM
+   and ~900GB of _usable_ storage.
