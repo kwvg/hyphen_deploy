@@ -13,7 +13,8 @@
 {
   imports = [
     ./anssi.nix
-    ./cloudflare.nix
+    ./svc/cloudflare.nix
+    ./svc/healthchecks.nix
     ./disko-config.nix
     ./hetzner.nix
     ./tunnel.nix
