@@ -24,6 +24,7 @@ in
     ./disko-config.nix
     ./hetzner.nix
     ./tunnel.nix
+    ./wireguard.nix
   ];
 
   system.stateVersion = "25.05";

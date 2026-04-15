@@ -35,5 +35,40 @@
       );
       default = { };
     };
+
+    wireguard = {
+      enabled = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+      };
+      privateKeyFile = lib.mkOption {
+        type = lib.types.str;
+        default = "/etc/wireguard/private.key";
+      };
+      address = lib.mkOption {
+        type = lib.types.str;
+        default = "";
+      };
+      listenPort = lib.mkOption {
+        type = lib.types.port;
+        default = 51820;
+      };
+      peers = lib.mkOption {
+        type = lib.types.listOf (
+          lib.types.submodule {
+            options = {
+              publicKey = lib.mkOption { type = lib.types.str; };
+              endpoint = lib.mkOption { type = lib.types.str; };
+              allowedIPs = lib.mkOption { type = lib.types.listOf lib.types.str; };
+              persistentKeepalive = lib.mkOption {
+                type = lib.types.int;
+                default = 25;
+              };
+            };
+          }
+        );
+        default = [ ];
+      };
+    };
   };
 }

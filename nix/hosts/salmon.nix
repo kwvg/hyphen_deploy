@@ -36,5 +36,16 @@
         };
       };
     };
+    wireguard = {
+      enabled = true;
+      address = "10.100.0.1/24";
+      peers = [
+        {
+          publicKey = "<KEPLAR_PUBKEY>";
+          endpoint = "<KEPLAR_PUBLIC_IP>:51820";
+          allowedIPs = [ "10.100.0.2/32" ];
+        }
+      ];
+    };
   };
 }

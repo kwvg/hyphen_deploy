@@ -33,5 +33,16 @@
         };
       };
     };
+    wireguard = {
+      enabled = true;
+      address = "10.100.0.2/24";
+      peers = [
+        {
+          publicKey = "<SALMON_PUBKEY>";
+          endpoint = "<SALMON_PUBLIC_IP>:51820";
+          allowedIPs = [ "10.100.0.1/32" ];
+        }
+      ];
+    };
   };
 }
