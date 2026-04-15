@@ -77,9 +77,21 @@ Host salmon
   UID 1000). We use this for all images except PostgreSQL, which uses the official image ([source](https://hub.docker.com/_/postgres))
   and has the PID and UID 999, so remember to `chown -R 999:999 data/postgresql`.
 
-* `nix`: Should be symlinked to `/etc/nixos`, NixOS configuration for Hetzner instance used for
-   deployment. Assumes Intel chip without architectural mitigations for Spectre/Meltdown, 64GB RAM
-   and ~900GB of _usable_ storage.
+* `nix`: NixOS configuration for Hetzner instance used for deployment. Assumes Intel chip without
+  architectural mitigations for Spectre/Meltdown, 64GB RAM and ~900GB of _usable_ storage.
 
 * `src`: Hosts the Hyphen monorepo with portioned copied by the containers to build binaries/dist
   needed for deploying `webui` and `hyphend`.
+
+### Notes
+
+```bash
+# Symlink
+ln -s ~/nix /etc/nixos
+
+# Sync config changes, requires restarting stack
+rsync -a ~/data/pg_hyphen /srv/cluster8k/hy_postgres
+rsync -a ~/data/hyphend /srv/cluster128k/hy_daemon
+rsync -a ~/data/dashd /srv/cluster128k/hy_dashd 
+rsync -a ~/data/nginx /srv/cluster128k/hy_nginx
+```

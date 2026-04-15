@@ -12,14 +12,6 @@ networks:
   net-web:
     internal: false
 
-volumes:
-  data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /home/smolt/data
-
 services:
   postgresql:
     container_name: postgresql
@@ -31,14 +23,11 @@ services:
       - POSTGRES_PASSWORD=<SUPER-SECRET-PASSWORD-WAHOO-MAR10>
       - POSTGRES_DB=hyphen
     volumes:
-      - type: volume
-        source: data
-        target: /var/lib/postgresql
-        volume:
-          subpath: postgresql
+      - /srv/cluster8k/hy_postgres:/var/lib/postgresql
     networks:
       - net-db
     restart: unless-stopped
+    command: postgres -c max_wal_size=4GB -c full_page_writes=off -c wal_init_zero=off -c wal_recycle=off
 
   dashd:
     container_name: dashd
@@ -51,11 +40,7 @@ services:
       - PGID=1000
       - TZ=Etc/UTC
     volumes:
-      - type: volume
-        source: data
-        target: /config
-        volume:
-          subpath: dashd
+      - /srv/cluster128k/hy_dashd:/config
     healthcheck:
       test: ["CMD", "dash-cli", "-datadir=/config", "getblockchaininfo"]
       interval: 10s
@@ -84,11 +69,7 @@ services:
       - PGID=1000
       - TZ=Etc/UTC
     volumes:
-      - type: volume
-        source: data
-        target: /config
-        volume:
-          subpath: hyphend
+      - /srv/cluster128k/hy_daemon:/config
     networks:
       - net-dash
       - net-db
@@ -110,8 +91,8 @@ services:
       - PGID=1000
       - TZ=Etc/UTC
     volumes:
-      - /home/smolt/data/nginx/hyphen.conf:/config/nginx/site-confs/default.conf
-      - /home/smolt/data/nginx/include:/config/nginx/include
+      - /srv/cluster128k/hy_nginx/hyphen.conf:/config/nginx/site-confs/default.conf
+      - /srv/cluster128k/hy_nginx/include:/config/nginx/include
     ports:
       - 80:80
     networks:

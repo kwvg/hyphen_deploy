@@ -126,6 +126,40 @@
             mountpoint = "/home";
             options.mountpoint = "/home";
           };
+          "data/srv" = {
+            type = "zfs_fs";
+            options = {
+              canmount = "off";
+              mountpoint = "none";
+            };
+          };
+          "data/srv/cluster8k" = {
+            type = "zfs_fs";
+            mountpoint = "/srv/cluster8k";
+            options = {
+              mountpoint = "/srv/cluster8k";
+              recordsize = "8K";
+              atime = "off";
+            };
+          };
+          "data/srv/cluster16k" = {
+            type = "zfs_fs";
+            mountpoint = "/srv/cluster16k";
+            options = {
+              mountpoint = "/srv/cluster16k";
+              recordsize = "16K";
+              atime = "off";
+            };
+          };
+          "data/srv/cluster128k" = {
+            type = "zfs_fs";
+            mountpoint = "/srv/cluster128k";
+            options = {
+              mountpoint = "/srv/cluster128k";
+              recordsize = "128K";
+              atime = "off";
+            };
+          };
         };
       };
     };

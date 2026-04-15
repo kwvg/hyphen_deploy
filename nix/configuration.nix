@@ -173,7 +173,7 @@
     ports = [ "127.0.0.1:9000:9000" ];
     volumes = [
       "/home/smolt:/home/smolt"
-      "/home/smolt/data/portainer:/data"
+      "/srv/cluster128k/portainer:/data"
       "/opt/docker-buildx:/usr/local/lib/docker/cli-plugins/docker-buildx:ro"
       "/var/run/docker.sock:/var/run/docker.sock"
     ];
