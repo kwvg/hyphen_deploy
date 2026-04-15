@@ -13,10 +13,42 @@
 
 let
   cfg = config.machine;
-  ingress = lib.mapAttrs' (_: svc: lib.nameValuePair svc.hostname svc.target) cfg.tunnels.services;
-  anyEnabled = ingress != { };
+  sshCfg = cfg.tunnels.ssh;
+  serviceIngress = lib.mapAttrs' (
+    _: svc: lib.nameValuePair svc.hostname svc.target
+  ) cfg.tunnels.services;
+  sshIngress = lib.optionalAttrs sshCfg.enabled { ${sshCfg.hostname} = "tcp://localhost:22"; };
+  ingress = serviceIngress // sshIngress;
+  anyEnabled = sshCfg.enabled || cfg.tunnels.services != { };
 in
 {
+  assertions = [
+    {
+      assertion = !sshCfg.enabled || sshCfg.hostname != "";
+      message = "machine.tunnels.ssh.hostname must be set when SSH tunnel is enabled";
+    }
+    {
+      assertion =
+        builtins.length (builtins.attrNames (builtins.intersectAttrs sshIngress serviceIngress)) == 0;
+      message = "machine.tunnels.ssh.hostname must not collide with any service tunnel hostname";
+    }
+  ];
+
+  # Bootstrap SSH: listen on all interfaces, open port 22 in firewall
+  # Tunneled  SSH: bind to loopback only, accessed via Cloudflare tunnel
+  services.openssh.listenAddresses = lib.mkIf sshCfg.enabled [
+    {
+      addr = "127.0.0.1";
+      port = 22;
+    }
+    {
+      addr = "::1";
+      port = 22;
+    }
+  ];
+
+  networking.firewall.allowedTCPPorts = lib.mkIf (!sshCfg.enabled) [ 22 ];
+
   services.cloudflared = lib.mkIf anyEnabled {
     enable = true;
     tunnels.${config.networking.hostName} = {

@@ -13,6 +13,17 @@
     routes = lib.mkOption { type = lib.types.listOf lib.types.attrs; };
     healthcheckUUID = lib.mkOption { type = lib.types.str; };
 
+    tunnels.ssh = {
+      enabled = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+      };
+      hostname = lib.mkOption {
+        type = lib.types.str;
+        default = "";
+      };
+    };
+
     tunnels.services = lib.mkOption {
       type = lib.types.attrsOf (
         lib.types.submodule {

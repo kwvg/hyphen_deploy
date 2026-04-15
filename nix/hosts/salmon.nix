@@ -24,27 +24,17 @@
       }
       { Gateway = "<WISH-RIGHT-NOW>"; }
     ];
-    tunnels.services = {
+    tunnels = {
       ssh = {
+        enabled = true;
         hostname = "<WISH-RIGHT-NOW>";
-        target = "tcp://localhost:22";
       };
-      portainer = {
-        hostname = "<AIRPLANES-IN-THE-NIGHT-SKY>";
-        target = "http://localhost:9000";
+      services = {
+        portainer = {
+          hostname = "<AIRPLANES-IN-THE-NIGHT-SKY>";
+          target = "http://localhost:9000";
+        };
       };
     };
   };
-
-  # SSH bound to localhost, accessed via Cloudflare tunnel
-  services.openssh.listenAddresses = [
-    {
-      addr = "127.0.0.1";
-      port = 22;
-    }
-    {
-      addr = "::1";
-      port = 22;
-    }
-  ];
 }
