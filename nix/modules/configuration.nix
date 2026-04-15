@@ -181,7 +181,7 @@
 
   # Firewall
   networking.firewall = {
-    allowedTCPPorts = lib.mkForce [ ];
-    allowedUDPPorts = lib.mkForce [ ];
+    allowedTCPPorts = [ ];
+    allowedUDPPorts = [ ];
   };
 }
