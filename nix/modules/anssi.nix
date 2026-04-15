@@ -1,11 +1,15 @@
 # Hardening based on ANSSI-BP-028-EN
 
 {
+  config,
   lib,
   pkgs,
   ...
 }:
 
+let
+  cfg = config.machine;
+in
 {
   # R5–R8: Kernel command line hardening
   boot.kernelParams = [
@@ -338,7 +342,7 @@
     };
   };
   users.groups.proc = { };
-  users.users.smolt.extraGroups = lib.mkAfter [ "proc" ];
+  users.users.${cfg.username}.extraGroups = lib.mkAfter [ "proc" ];
 
   # R56: Restrict core dumps
   security.pam.loginLimits = [
@@ -371,6 +375,6 @@
     enable = true;
     allowReboot = false;
     dates = "04:00";
-    flake = "/etc/nixos#salmon";
+    flake = "/etc/nixos#${cfg.hostname}";
   };
 }

@@ -1,10 +1,14 @@
 # Allow HTTP(S) only from Cloudflare IPs, refreshed daily
 
 {
+  config,
   pkgs,
   ...
 }:
 
+let
+  cfg = config.machine;
+in
 {
   systemd.services.cloudflare-firewall = {
     description = "Allow HTTP(S) only from Cloudflare origin addresses";
@@ -89,10 +93,10 @@
 
       # Only jump into the chain for inbound traffic to 80/443 from the
       # physical NIC. Outbound, inter-container, and other ports skip it.
-      iptables -I DOCKER-USER -i enp0s31f6 -p tcp --dport 80 -j cloudflare-fwd
-      iptables -I DOCKER-USER -i enp0s31f6 -p tcp --dport 443 -j cloudflare-fwd
-      ip6tables -I DOCKER-USER -i enp0s31f6 -p tcp --dport 80 -j cloudflare6-fwd
-      ip6tables -I DOCKER-USER -i enp0s31f6 -p tcp --dport 443 -j cloudflare6-fwd
+      iptables -I DOCKER-USER -i ${cfg.nicName} -p tcp --dport 80 -j cloudflare-fwd
+      iptables -I DOCKER-USER -i ${cfg.nicName} -p tcp --dport 443 -j cloudflare-fwd
+      ip6tables -I DOCKER-USER -i ${cfg.nicName} -p tcp --dport 80 -j cloudflare6-fwd
+      ip6tables -I DOCKER-USER -i ${cfg.nicName} -p tcp --dport 443 -j cloudflare6-fwd
     '';
   };
 

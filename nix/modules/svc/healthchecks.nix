@@ -1,10 +1,14 @@
 # Ping healthchecks.io when both daemon and Web UI are active
 
 {
+  config,
   pkgs,
   ...
 }:
 
+let
+  cfg = config.machine;
+in
 {
   systemd.services.healthcheck-ping = {
     description = "Ping healthchecks.io if nginx and API are healthy";
@@ -23,9 +27,9 @@
       web_ret=$(curl -sf -o /dev/null -w "%{http_code}" http://localhost:80/ || echo "000")
       svc_ret=$(curl -sf -o /dev/null -w "%{http_code}" http://localhost:80/api/v1/status || echo "000")
       if [ "$web_ret" = "200" ] && [ "$svc_ret" = "200" ]; then
-        curl -sf -o /dev/null https://hc-ping.com/ebd0a0a2-a7e0-baad-f00d-68b6b72699c7
+        curl -sf -o /dev/null https://hc-ping.com/${cfg.healthcheckUUID}
       else
-        curl -sf -o /dev/null https://hc-ping.com/ebd0a0a2-a7e0-baad-f00d-68b6b72699c7/fail
+        curl -sf -o /dev/null https://hc-ping.com/${cfg.healthcheckUUID}/fail
       fi
     '';
   };

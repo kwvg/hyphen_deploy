@@ -1,15 +1,15 @@
 # General configuration
-#
-# - Remember to change your SSH key
-# - hetzner.nix needs to be updated on YOUR machine's specifics
-# - The version of Rust deployed is NOT pinned, `rustup` will let you select your toolchain
 
 {
+  config,
   lib,
   pkgs,
   ...
 }:
 
+let
+  cfg = config.machine;
+in
 {
   imports = [
     ./anssi.nix
@@ -102,23 +102,21 @@
   # Users
   users.users = {
     root.hashedPassword = "!";
-    smolt = {
+    ${cfg.username} = {
       isNormalUser = true;
       uid = 1000;
-      group = "smolt";
+      group = cfg.username;
       extraGroups = [
         "wheel"
         "docker"
       ];
       shell = pkgs.fish;
-      home = "/home/smolt";
-      openssh.authorizedKeys.keys = [
-        "<CAN-WE-PRETEND-THAT-AIRPLANES-IN-THE-NIGHT-SKY-ARE-LIKE-SHOOTING-STARS>"
-      ];
+      home = "/home/${cfg.username}";
+      openssh.authorizedKeys.keys = cfg.sshAuthorizedKeys;
     };
   };
   users.groups = {
-    smolt = {
+    ${cfg.username} = {
       gid = 1000;
     };
   };
@@ -172,7 +170,7 @@
     image = "portainer/portainer-ce:latest";
     ports = [ "127.0.0.1:9000:9000" ];
     volumes = [
-      "/home/smolt:/home/smolt"
+      "/home/${cfg.username}:/home/${cfg.username}"
       "/srv/cluster128k/portainer:/data"
       "/opt/docker-buildx:/usr/local/lib/docker/cli-plugins/docker-buildx:ro"
       "/var/run/docker.sock:/var/run/docker.sock"

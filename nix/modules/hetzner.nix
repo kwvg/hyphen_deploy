@@ -1,20 +1,24 @@
-# Host-specific configuration
+# Host-specific network and identity configuration
 
 {
+  config,
   lib,
   ...
 }:
 
+let
+  cfg = config.machine;
+in
 {
   # Intel platform
   boot.kernelModules = [ "kvm-intel" ];
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
   # Host identity
-  networking.hostName = "salmon";
+  networking.hostName = cfg.hostname;
 
   # ZFS requires unique hostId, generate randomly
-  networking.hostId = "<I-COULD-REALLY-USE-A-WISH-RIGHT-NOW>";
+  networking.hostId = cfg.hostId;
 
   # Static networking via systemd-networkd
   networking.useNetworkd = true;
@@ -23,19 +27,9 @@
   # Use rescue OS to get NIC name and get IP config from console
   systemd.network.enable = true;
   systemd.network.networks."30-wan" = {
-    matchConfig.Name = "<WISH-RIGHT-NOW>";
+    matchConfig.Name = cfg.nicName;
     networkConfig.DHCP = "no";
-    address = [
-      "<WISH-RIGHT-NOW>"
-      "<CAN-WE-PRETEND-THAT-AIRPLANES-IN-THE-NIGHT-SKY-ARE-LIKE-SHOOTING-STARS>"
-    ];
-    routes = [
-      {
-        Gateway = "<I-COULD-REALLY-USE-A-WISH-RIGHT-NOW>";
-        GatewayOnLink = true;
-      }
-      { Gateway = "<WISH-RIGHT-NOW>"; }
-    ];
+    inherit (cfg) addresses routes;
   };
 
   # Using non-Hetzner nameservers
