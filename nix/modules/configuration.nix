@@ -9,6 +9,12 @@
 
 let
   cfg = config.machine;
+  docker-buildx = pkgs.fetchurl {
+    url = "https://github.com/docker/buildx/releases/download/v0.21.2/buildx-v0.21.2.linux-amd64";
+    hash = "sha256-gM5DM1Z2JsWzeHW7E/GGn0pEwxu8bhh15hOCkozo7nQ=";
+    executable = true;
+    name = "docker-buildx";
+  };
 in
 {
   imports = [
@@ -136,20 +142,6 @@ in
   # No swap
   swapDevices = [ ];
 
-  system.activationScripts.docker-buildx =
-    let
-      buildxVersion = "0.21.2";
-      buildxUrl = "https://github.com/docker/buildx/releases/download/v${buildxVersion}/buildx-v${buildxVersion}.linux-amd64";
-      dest = "/opt/docker-buildx";
-    in
-    ''
-      if [ ! -f ${dest} ] || ! ${dest} version 2>/dev/null | grep -q "${buildxVersion}"; then
-        mkdir -p $(dirname ${dest})
-        ${pkgs.curl}/bin/curl -fsSL -o ${dest} ${buildxUrl}
-        chmod +x ${dest}
-      fi
-    '';
-
   # Docker with overlay2 to avoid trashing ZFS
   virtualisation.docker = {
     enable = true;
@@ -172,7 +164,7 @@ in
     volumes = [
       "/home/${cfg.username}:/home/${cfg.username}"
       "/srv/cluster128k/portainer:/data"
-      "/opt/docker-buildx:/usr/local/lib/docker/cli-plugins/docker-buildx:ro"
+      "${docker-buildx}:/usr/local/lib/docker/cli-plugins/docker-buildx:ro"
       "/var/run/docker.sock:/var/run/docker.sock"
     ];
   };
