@@ -89,7 +89,7 @@
         rootFsOptions = {
           compression = "zstd-4";
           checksum = "blake3";
-          dedup = "blake3";
+          dedup = "off";
           acltype = "posixacl";
           xattr = "sa";
           dnodesize = "auto";
