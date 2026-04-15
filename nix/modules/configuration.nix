@@ -17,6 +17,7 @@ in
     ./svc/healthchecks.nix
     ./disko-config.nix
     ./hetzner.nix
+    ./tunnel.nix
   ];
 
   system.stateVersion = "25.05";

@@ -24,6 +24,16 @@
       }
       { Gateway = "<WISH-RIGHT-NOW>"; }
     ];
+    tunnels.services = {
+      ssh = {
+        hostname = "<WISH-RIGHT-NOW>";
+        target = "tcp://localhost:22";
+      };
+      portainer = {
+        hostname = "<AIRPLANES-IN-THE-NIGHT-SKY>";
+        target = "http://localhost:9000";
+      };
+    };
   };
 
   # SSH bound to localhost, accessed via Cloudflare tunnel
@@ -37,27 +47,4 @@
       port = 22;
     }
   ];
-
-  # Cloudflare Tunnel for proxying services
-  #
-  # Setup:
-  #   cloudflared tunnel login
-  #   cloudflared tunnel create salmon
-  #   cloudflared tunnel route dns salmon ssh.yourdomain.com
-  #   sudo cp ~/.cloudflared/*.json /etc/cloudflared/credentials.json
-  #   sudo cp ~/.cloudflared/cert.pem /etc/cloudflared/cert.pem
-  #   sudo chown -R root:root /etc/cloudflared
-  #   sudo nixos-rebuild switch --flake .#salmon
-  #
-  services.cloudflared = {
-    enable = true;
-    tunnels.salmon = {
-      credentialsFile = "/etc/cloudflared/credentials.json";
-      default = "http_status:404";
-      ingress = {
-        "<WISH-RIGHT-NOW>" = "tcp://localhost:22";
-        "<AIRPLANES-IN-THE-NIGHT-SKY>" = "http://localhost:9000";
-      };
-    };
-  };
 }
