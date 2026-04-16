@@ -107,3 +107,70 @@ Host hostname
   sudo zfs unmount ${dataset}
   sudo zfs mount ${dataset}
   ```
+
+* In recovery shell (KVM mode disables internet access), to `chroot` into the NixOS session you need
+
+  * To deal with `repository path is not owned by current user`, you may need to run
+    `git config --global --add safe.directory ${dir}` before `nixos-rebuild` will run.
+
+  * You may need to re-run `sudo nixos-rebuild switch --flake /etc/nixos#hostname` again once you're
+    in the recovered session
+
+  * The firewall can seize up as during `curl` failure, it'll block _all_ traffic, this is resolved
+    by running `sudo systemctl restart cloudflare-firewall` which should re-fetch the origin list and
+    this can be verified using `sudo iptables -L cloudflare -n`
+
+  ```bash
+  # Trigger Hetzner ZFS install
+  zfs
+
+  # Make pool visible
+  zpool import -f tank
+
+  # Change mount points to be able to `chroot`, then mount
+  zfs set mountpoint=/mnt tank/ROOT/default
+  zfs mount tank/ROOT/default
+
+  zfs set mountpoint=/mnt/home tank/data/home
+  zfs mount tank/data/home
+
+  zfs set mountpoint=/mnt/srv/cluster8k tank/data/srv/cluster8k
+  zfs mount tank/data/srv/cluster8k
+
+  zfs set mountpoint=/mnt/srv/cluster16k tank/data/srv/cluster16k
+  zfs mount tank/data/srv/cluster16k
+
+  zfs set mountpoint=/mnt/srv/cluster128k tank/data/srv/cluster128k
+  zfs mount tank/data/srv/cluster128k
+
+  # Mount boot partition
+  mount /dev/md/boot /mnt/boot
+
+  # Fetch and run nixos-enter script (it assumes /mnt by default)
+  curl https://raw.githubusercontent.com/NixOS/nixpkgs/refs/heads/master/pkgs/by-name/ni/nixos-enter/nixos-enter.sh -o nixos-enter.sh
+  chmod +x nixos-enter.sh
+  ./nixos-enter.sh
+
+  # [...]
+
+  # When you're done
+  exit
+
+  # Unmount everything
+  umount /mnt/boot
+  zfs unmount tank/data/srv/cluster128k
+  zfs unmount tank/data/srv/cluster16k
+  zfs unmount tank/data/srv/cluster8k
+  zfs unmount tank/data/home
+  zfs unmount tank/ROOT/default
+
+  # Restore old mount points
+  zfs set mountpoint=/srv/cluster128k tank/data/srv/cluster128k
+  zfs set mountpoint=/srv/cluster16k tank/data/srv/cluster16k
+  zfs set mountpoint=/srv/cluster8k tank/data/srv/cluster8k
+  zfs set mountpoint=/home tank/data/home
+  zfs set mountpoint=/ tank/ROOT/default
+  
+  # Sayonara (and reboot from Hetzner's console)
+  zpool export tank
+  ```
