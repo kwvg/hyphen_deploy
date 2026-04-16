@@ -1,9 +1,7 @@
-#! @runtimeShell@
+#!/bin/bash
 # shellcheck shell=bash
 
 set -e
-
-export PATH=@path@:$PATH
 
 # Re-exec ourselves in a private mount namespace so that our bind
 # mounts get cleaned up automatically.

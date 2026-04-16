@@ -147,7 +147,7 @@ Host hostname
   mount /dev/md/boot /mnt/boot
 
   # Fetch and run nixos-enter script (it assumes /mnt by default)
-  curl https://raw.githubusercontent.com/NixOS/nixpkgs/refs/heads/master/pkgs/by-name/ni/nixos-enter/nixos-enter.sh -o nixos-enter.sh
+  curl https://raw.githubusercontent.com/kwvg/hyphen_deploy/refs/heads/.local/bin/nixos-enter -o nixos-enter
   chmod +x nixos-enter.sh
   ./nixos-enter.sh
 
