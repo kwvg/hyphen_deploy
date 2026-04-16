@@ -18,7 +18,7 @@ Things you should know:
   so you only get 4 addressable threads instead of 8. Adjust your scripts accordingly.
 
 * To apply the Nix configuration, boot into the Hetzner recovery image (use Hetzner Robot to do that)
-  and run `nix run github:nix-community/nixos-anywhere -- --flake ./nix#salmon root@[ip-addr-here]`.
+  and run `nix run github:nix-community/nixos-anywhere -- --flake ./nix#hostname root@[ip-addr-here]`.
   Yes, you will need to install Nix on your local system for this to work. macOS users should use
   Determinate Systems' Nix ([source](https://docs.determinate.systems/determinate-nix/)).
 
@@ -42,7 +42,7 @@ direct port 22 access without first confirming the portal works. You do _not_ ne
 > Silicon Macs.
 
 ```
-Host salmon
+Host hostname
   HostName ssh.example.com
   User username
   IdentitiesOnly yes
@@ -68,7 +68,7 @@ Host salmon
 * As we are using PostgreSQL 18, the expected datadir is `postgresql/18/docker`, make sure the files
   are located there. You may need to also run `ALTER DATABASE hyphen REFRESH COLLATION VERSION;` if
   moving from a host with a different `glibc` version than the container (this also affects the
-  `postgres` and `template1` databases). 
+  `postgres` and `template1` databases).
 
 ### Directories
 
@@ -85,14 +85,25 @@ Host salmon
 
 ### Notes
 
-```bash
-# Symlink
-ln -s ~/nix /etc/nixos
+* General setup
 
-# Sync config changes, requires restarting stack
-rsync -a ~/data/pg_hyphen /srv/cluster8k/hy_postgres
-rsync -a ~/data/opensearch /srv/cluster16k/hy_opensearch
-rsync -a ~/data/hyphend /srv/cluster128k/hy_daemon
-rsync -a ~/data/dashd /srv/cluster128k/hy_dashd 
-rsync -a ~/data/nginx /srv/cluster128k/hy_nginx
-```
+  ```bash
+  # Symlink
+  ln -s ~/nix /etc/nixos
+
+  # Sync config changes, requires restarting stack
+  rsync -a ~/data/pg_hyphen/ /srv/cluster8k/hy_postgres
+  rsync -a ~/data/opensearch/ /srv/cluster16k/hy_opensearch
+  rsync -a ~/data/hyphend/ /srv/cluster128k/hy_daemon
+  rsync -a ~/data/dashd/ /srv/cluster128k/hy_dashd
+  rsync -a ~/data/nginx/ /srv/cluster128k/hy_nginx
+  ```
+
+* After a `zfs send | zfs recv` sometimes the dataset can be inaccessible (e.g. `Input/output error`).
+  If you can confirm that the zpool is healthy (`sudo zpool status -v`), unmounting and remounting
+  can resolve the issue.
+
+  ```bash
+  sudo zfs unmount ${dataset}
+  sudo zfs mount ${dataset}
+  ```
