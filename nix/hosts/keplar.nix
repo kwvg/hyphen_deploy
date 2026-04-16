@@ -31,6 +31,10 @@
           hostname = "<AIRPLANES-IN-THE-NIGHT-SKY>";
           target = "http://localhost:9000";
         };
+        public = {
+          hostname = "<ARE-LIKE-SHOOTING-STARS>";
+          target = "http://localhost:80";
+        };
       };
     };
     wireguard = {
