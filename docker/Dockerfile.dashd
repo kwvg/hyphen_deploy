@@ -16,10 +16,10 @@ RUN mkdir -p \
     echo "longrun" > /etc/s6-overlay/s6-rc.d/svc-dashd/type && \
     touch /etc/s6-overlay/s6-rc.d/svc-dashd/dependencies.d/init-services && \
     touch /etc/s6-overlay/s6-rc.d/user/contents.d/svc-dashd && \
-    printf '#!/usr/bin/with-contenv bash\nexec s6-setuidgid abc dashd -datadir=/config -printtoconsole > /proc/1/fd/1 2>&1\n' \
+    printf '#!/usr/bin/with-contenv bash\nexec s6-setuidgid abc dashd -datadir=/config -printtoconsole ${DAEMON_ARGS} > /proc/1/fd/1 2>&1\n' \
       > /etc/s6-overlay/s6-rc.d/svc-dashd/run && \
     chmod +x /etc/s6-overlay/s6-rc.d/svc-dashd/run
 
-EXPOSE 9998 9999
+EXPOSE 9998 9999 19998 19999
 
 VOLUME /config
