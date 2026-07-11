@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     disko = {
       url = "github:nix-community/disko";
@@ -46,5 +46,6 @@
       formatter.aarch64-darwin = nixpkgs.legacyPackages.aarch64-darwin.nixfmt-rfc-style;
 
       nixosConfigurations.salmon = mkHost ./hosts/salmon.nix;
+      nixosConfigurations.keplar = mkHost ./hosts/keplar.nix;
     };
 }

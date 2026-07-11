@@ -29,7 +29,8 @@ in
   systemd.network.networks."30-wan" = {
     matchConfig.Name = cfg.nicName;
     networkConfig.DHCP = "no";
-    inherit (cfg) addresses routes;
+    address = cfg.addresses;
+    inherit (cfg) routes;
   };
 
   # Using non-Hetzner nameservers
