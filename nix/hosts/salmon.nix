@@ -30,13 +30,17 @@
         hostname = "<WISH-RIGHT-NOW>";
       };
       services = {
-        portainer = {
-          hostname = "<AIRPLANES-IN-THE-NIGHT-SKY>";
-          target = "http://localhost:9000";
-        };
-        public = {
-          hostname = "<ARE-LIKE-SHOOTING-STARS>";
+        internal_main = {
+          hostname = "<CAN-WE-PRETEND-THAT>";
           target = "http://localhost:80";
+        };
+        internal_test = {
+          hostname = "<AIRPLANES-IN-THE-NIGHT-SKY>";
+          target = "http://localhost:80";
+        };
+        portainer = {
+          hostname = "<ARE-LIKE-SHOOTING-STARS>";
+          target = "http://localhost:9000";
         };
       };
     };

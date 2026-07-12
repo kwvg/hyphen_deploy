@@ -1,0 +1,93 @@
+# syntax=docker/dockerfile:1
+
+# Testnet daemon and configuration for Hyphen
+
+networks:
+  ts-dash:
+    name: ts-dash
+    internal: false
+  net-db:
+    name: net-db
+    external: true
+  net-api:
+    name: net-api
+    external: true
+
+services:
+  ts-dashd:
+    container_name: ts-dashd
+    build:
+      context: /home/smolt/docker
+      dockerfile: Dockerfile.dashd
+    mem_limit: 2g
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - DAEMON_ARGS=-testnet
+    volumes:
+      - /srv/cluster128k/ts_dashd:/config
+    healthcheck:
+      test:
+        ["CMD", "dash-cli", "-testnet", "-datadir=/config", "getblockchaininfo"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    networks:
+      - ts-dash
+    restart: unless-stopped
+
+  # Requires hy-postgresql from the base stack to be running.
+  ts-opensearch:
+    container_name: ts-opensearch
+    image: opensearchproject/opensearch:3
+    mem_limit: 2g
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+      nproc:
+        soft: 4096
+        hard: 4096
+    environment:
+      - TZ=Etc/UTC
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+      - DISABLE_PERFORMANCE_ANALYZER_AGENT_CLI=true
+      - OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=<TOP-SECRET-IMPORTANT-CREDENTIAL-WHHOO>
+    volumes:
+      - /srv/cluster16k/ts_opensearch/config/opensearch.yml:/usr/share/opensearch/config/opensearch.yml
+      - /srv/cluster16k/ts_opensearch/data:/usr/share/opensearch/data
+      - /srv/cluster16k/ts_opensearch/logs:/usr/share/opensearch/logs
+    networks:
+      - net-db
+    restart: unless-stopped
+
+  ts-hyphend:
+    container_name: ts-hyphend
+    depends_on:
+      ts-dashd:
+        condition: service_healthy
+      ts-opensearch:
+        condition: service_started
+    build:
+      context: /home/smolt/docker
+      dockerfile: Dockerfile.hyphend
+      additional_contexts:
+        src: /home/smolt/src
+    mem_limit: 6g
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - /srv/cluster128k/ts_daemon:/config
+    networks:
+      - ts-dash
+      - net-db
+      - net-api
+    restart: unless-stopped
