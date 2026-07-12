@@ -51,12 +51,45 @@ services:
       - net-dash
     restart: unless-stopped
 
+  opensearch:
+    container_name: opensearch
+    depends_on:
+      postgresql:
+        condition: service_started
+    image: opensearchproject/opensearch:3
+    mem_limit: 4g
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+      nproc:
+        soft: 4096
+        hard: 4096
+    environment:
+      - TZ=Etc/UTC
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+      - DISABLE_PERFORMANCE_ANALYZER_AGENT_CLI=true
+      - OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=<TOP-SECRET-IMPORTANT-CREDENTIAL-WHHOO>
+    volumes:
+      - /srv/cluster16k/hy_opensearch/config/opensearch.yml:/usr/share/opensearch/config/opensearch.yml
+      - /srv/cluster16k/hy_opensearch/data:/usr/share/opensearch/data
+      - /srv/cluster16k/hy_opensearch/logs:/usr/share/opensearch/logs
+    networks:
+      - net-db
+    restart: unless-stopped
+
   hyphend:
     container_name: hyphend
     depends_on:
       dashd:
         condition: service_healthy
       postgresql:
+        condition: service_started
+      opensearch:
         condition: service_started
     build:
       context: /home/smolt/docker

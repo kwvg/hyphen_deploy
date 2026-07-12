@@ -1,0 +1,8 @@
+cluster.name: hyphen
+node.name: hyphen-search
+network.host: 0.0.0.0
+discovery.type: single-node
+
+action.auto_create_index: true
+indices.query.bool.max_clause_count: 4096
+plugins.security.disabled: true

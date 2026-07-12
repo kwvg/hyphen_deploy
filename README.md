@@ -91,6 +91,7 @@ ln -s ~/nix /etc/nixos
 
 # Sync config changes, requires restarting stack
 rsync -a ~/data/pg_hyphen /srv/cluster8k/hy_postgres
+rsync -a ~/data/opensearch /srv/cluster16k/hy_opensearch
 rsync -a ~/data/hyphend /srv/cluster128k/hy_daemon
 rsync -a ~/data/dashd /srv/cluster128k/hy_dashd 
 rsync -a ~/data/nginx /srv/cluster128k/hy_nginx
