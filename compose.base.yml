@@ -30,8 +30,26 @@ services:
     restart: unless-stopped
     command: postgres -c max_wal_size=4GB -c full_page_writes=off -c wal_init_zero=off -c wal_recycle=off
 
+  hy-certbot:
+    container_name: hy-certbot
+    image: certbot/certbot:latest
+    user: "1000:1000"
+    mem_limit: 256m
+    environment:
+      - TZ=Etc/UTC
+    volumes:
+      - /srv/cluster128k/hy_certbot/etc:/etc/letsencrypt
+      - /srv/cluster128k/hy_certbot/lib:/var/lib/letsencrypt
+      - /srv/cluster128k/hy_certbot/log:/var/log/letsencrypt
+      - /srv/cluster128k/hy_certbot/www:/var/www/certbot
+    entrypoint: /bin/sh
+    command: -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot; sleep 12h & wait $$!; done'
+    restart: unless-stopped
+
   hy-webui:
     container_name: hy-webui
+    depends_on:
+      - hy-certbot
     build:
       context: /home/smolt/docker
       dockerfile: Dockerfile.webui
@@ -46,8 +64,13 @@ services:
       - /home/smolt/data/cluster128k/hy_nginx/hyphen.conf:/config/nginx/site-confs/default.conf
       - /home/smolt/data/cluster128k/hy_nginx/include:/config/nginx/include
       - /home/smolt/data/cluster128k/hy_nginx/webui:/config/nginx/webui
+      - /home/smolt/docker/webui/arm_cronjobs.sh:/config/custom-cont-init.d/50-reload-cron.sh:ro
+      - /home/smolt/docker/webui/init_chicken.sh:/config/custom-cont-init.d/40-bootstrap-certs.sh:ro
+      - /srv/cluster128k/hy_certbot/etc:/etc/nginx/ssl
+      - /srv/cluster128k/hy_certbot/www:/var/www/certbot:ro
     ports:
       - 80:80
+      - 443:443
     networks:
       - net-api
       - net-web

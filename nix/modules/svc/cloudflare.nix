@@ -1,4 +1,4 @@
-# Allow HTTP(S) only from Cloudflare IPs, refreshed daily
+# Allow HTTPS only from Cloudflare IPs, refreshed daily
 
 {
   config,
@@ -11,7 +11,7 @@ let
 in
 {
   systemd.services.cloudflare-firewall = {
-    description = "Allow HTTP(S) only from Cloudflare origin addresses";
+    description = "Allow HTTPS only from Cloudflare origin addresses";
     after = [
       "network-online.target"
       "firewall.service"
@@ -61,10 +61,8 @@ in
       iptables -A cloudflare -j DROP
       ip6tables -A cloudflare6 -j DROP
 
-      # Jump into INPUT chains from nixos-fw (only for 80/443)
-      iptables -I nixos-fw -p tcp --dport 80 -j cloudflare
+      # Jump into INPUT chains from nixos-fw (only for 443)
       iptables -I nixos-fw -p tcp --dport 443 -j cloudflare
-      ip6tables -I nixos-fw -p tcp --dport 80 -j cloudflare6
       ip6tables -I nixos-fw -p tcp --dport 443 -j cloudflare6
 
       # Remove all jumps to our FORWARD chains (handles any previous rule signature)
@@ -77,28 +75,26 @@ in
 
       # Apply IPv4 FORWARD rules
       for cidr in $v4; do
-        iptables -A cloudflare-fwd -p tcp -s "$cidr" --dport 80 -j RETURN
         iptables -A cloudflare-fwd -p tcp -s "$cidr" --dport 443 -j RETURN
       done
 
       # Apply IPv6 FORWARD rules
       for cidr in $v6; do
-        ip6tables -A cloudflare6-fwd -p tcp -s "$cidr" --dport 80 -j RETURN
         ip6tables -A cloudflare6-fwd -p tcp -s "$cidr" --dport 443 -j RETURN
       done
 
-      # Drop non-Cloudflare traffic to 80/443
+      # Drop non-Cloudflare traffic to 443
       iptables -A cloudflare-fwd -j DROP
       ip6tables -A cloudflare6-fwd -j DROP
 
-      # Only jump into the chain for inbound traffic to 80/443 from the
+      # Only jump into the chain for inbound traffic to 443 from the
       # physical NIC. Outbound, inter-container, and other ports skip it.
-      iptables -I DOCKER-USER -i ${cfg.nicName} -p tcp --dport 80 -j cloudflare-fwd
       iptables -I DOCKER-USER -i ${cfg.nicName} -p tcp --dport 443 -j cloudflare-fwd
-      ip6tables -I DOCKER-USER -i ${cfg.nicName} -p tcp --dport 80 -j cloudflare6-fwd
       ip6tables -I DOCKER-USER -i ${cfg.nicName} -p tcp --dport 443 -j cloudflare6-fwd
     '';
   };
+
+  networking.firewall.allowedTCPPorts = [ 80 ];
 
   systemd.timers.cloudflare-firewall = {
     description = "Refresh Cloudflare origin addresses";

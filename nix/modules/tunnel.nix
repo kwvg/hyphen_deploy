@@ -15,7 +15,10 @@ let
   cfg = config.machine;
   sshCfg = cfg.tunnels.ssh;
   serviceIngress = lib.mapAttrs' (
-    _: svc: lib.nameValuePair svc.hostname svc.target
+    _: svc: lib.nameValuePair svc.hostname {
+      service = svc.target;
+      originRequest.originServerName = svc.hostname;
+    }
   ) cfg.tunnels.services;
   sshIngress = lib.optionalAttrs sshCfg.enabled { ${sshCfg.hostname} = "tcp://localhost:22"; };
   ingress = serviceIngress // sshIngress;

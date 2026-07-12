@@ -32,11 +32,11 @@
       };
       services = {
         internal_main = {
-          hostname = "<CAN-WE-PRETEND-THAT>";
+          hostname = "mainnet.restricted.site";
           target = "http://localhost:80";
         };
         internal_test = {
-          hostname = "<AIRPLANES-IN-THE-NIGHT-SKY>";
+          hostname = "testnet.restricted.site";
           target = "http://localhost:80";
         };
         portainer = {
