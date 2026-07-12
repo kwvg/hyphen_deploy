@@ -26,6 +26,7 @@ services:
       - TZ=Etc/UTC
       - DAEMON_ARGS=-testnet
     volumes:
+      - /home/smolt/data/cluster128k/ts_dashd/dash.conf:/config/dash.conf
       - /srv/cluster128k/ts_dashd:/config
     healthcheck:
       test:
@@ -60,7 +61,7 @@ services:
       - OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g
       - OPENSEARCH_INITIAL_ADMIN_PASSWORD=<TOP-SECRET-IMPORTANT-CREDENTIAL-WHHOO>
     volumes:
-      - /srv/cluster16k/ts_opensearch/config/opensearch.yml:/usr/share/opensearch/config/opensearch.yml
+      - /home/smolt/data/cluster16k/ts_opensearch/config/opensearch.yml:/usr/share/opensearch/config/opensearch.yml
       - /srv/cluster16k/ts_opensearch/data:/usr/share/opensearch/data
       - /srv/cluster16k/ts_opensearch/logs:/usr/share/opensearch/logs
     networks:
@@ -85,6 +86,7 @@ services:
       - PGID=1000
       - TZ=Etc/UTC
     volumes:
+      - /home/smolt/data/cluster128k/ts_daemon/hyphen.conf:/config/hyphen.conf
       - /srv/cluster128k/ts_daemon:/config
     networks:
       - ts-dash

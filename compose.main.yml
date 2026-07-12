@@ -25,6 +25,7 @@ services:
       - PGID=1000
       - TZ=Etc/UTC
     volumes:
+      - /home/smolt/data/cluster128k/hy_dashd/dash.conf:/config/dash.conf
       - /srv/cluster128k/hy_dashd:/config
     healthcheck:
       test: ["CMD", "dash-cli", "-datadir=/config", "getblockchaininfo"]
@@ -58,7 +59,7 @@ services:
       - OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g
       - OPENSEARCH_INITIAL_ADMIN_PASSWORD=<TOP-SECRET-IMPORTANT-CREDENTIAL-WHHOO>
     volumes:
-      - /srv/cluster16k/hy_opensearch/config/opensearch.yml:/usr/share/opensearch/config/opensearch.yml
+      - /home/smolt/data/cluster16k/hy_opensearch/config/opensearch.yml:/usr/share/opensearch/config/opensearch.yml
       - /srv/cluster16k/hy_opensearch/data:/usr/share/opensearch/data
       - /srv/cluster16k/hy_opensearch/logs:/usr/share/opensearch/logs
     networks:
@@ -83,6 +84,7 @@ services:
       - PGID=1000
       - TZ=Etc/UTC
     volumes:
+      - /home/smolt/data/cluster128k/hy_daemon/hyphen.conf:/config/hyphen.conf
       - /srv/cluster128k/hy_daemon:/config
     networks:
       - hy-dash
