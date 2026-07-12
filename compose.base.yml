@@ -45,6 +45,7 @@ services:
     volumes:
       - /srv/cluster128k/hy_nginx/hyphen.conf:/config/nginx/site-confs/default.conf
       - /srv/cluster128k/hy_nginx/include:/config/nginx/include
+      - /srv/cluster128k/hy_nginx/webui:/config/nginx/webui
     ports:
       - 80:80
     networks:
