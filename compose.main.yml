@@ -1,40 +1,25 @@
 # syntax=docker/dockerfile:1
 
-# Managed through Portainer, kept here for reference only
+# Mainnet daemon and configuration for Hyphen
 
 networks:
-  net-dash:
+  hy-dash:
+    name: hy-dash
     internal: false
   net-db:
-    internal: true
+    name: net-db
+    external: true
   net-api:
-    internal: true
-  net-web:
-    internal: false
+    name: net-api
+    external: true
 
 services:
-  postgresql:
-    container_name: postgresql
-    image: postgres:18-trixie
-    mem_limit: 20g
-    environment:
-      - TZ=Etc/UTC
-      - POSTGRES_USER=smolt
-      - POSTGRES_PASSWORD=<SUPER-SECRET-PASSWORD-WAHOO-MAR10>
-      - POSTGRES_DB=hyphen
-    volumes:
-      - /srv/cluster8k/hy_postgres:/var/lib/postgresql
-    networks:
-      - net-db
-    restart: unless-stopped
-    command: postgres -c max_wal_size=4GB -c full_page_writes=off -c wal_init_zero=off -c wal_recycle=off
-
-  dashd:
-    container_name: dashd
+  hy-dashd:
+    container_name: hy-dashd
     build:
       context: /home/smolt/docker
       dockerfile: Dockerfile.dashd
-    mem_limit: 4g
+    mem_limit: 2g
     environment:
       - PUID=1000
       - PGID=1000
@@ -48,16 +33,14 @@ services:
       retries: 30
       start_period: 30s
     networks:
-      - net-dash
+      - hy-dash
     restart: unless-stopped
 
-  opensearch:
-    container_name: opensearch
-    depends_on:
-      postgresql:
-        condition: service_started
+  # Requires hy-postgresql from the base stack to be running.
+  hy-opensearch:
+    container_name: hy-opensearch
     image: opensearchproject/opensearch:3
-    mem_limit: 4g
+    mem_limit: 2g
     ulimits:
       memlock:
         soft: -1
@@ -82,21 +65,19 @@ services:
       - net-db
     restart: unless-stopped
 
-  hyphend:
-    container_name: hyphend
+  hy-hyphend:
+    container_name: hy-hyphend
     depends_on:
-      dashd:
+      hy-dashd:
         condition: service_healthy
-      postgresql:
-        condition: service_started
-      opensearch:
+      hy-opensearch:
         condition: service_started
     build:
       context: /home/smolt/docker
       dockerfile: Dockerfile.hyphend
       additional_contexts:
         src: /home/smolt/src
-    mem_limit: 12g
+    mem_limit: 6g
     environment:
       - PUID=1000
       - PGID=1000
@@ -104,31 +85,7 @@ services:
     volumes:
       - /srv/cluster128k/hy_daemon:/config
     networks:
-      - net-dash
+      - hy-dash
       - net-db
       - net-api
-    restart: unless-stopped
-
-  webui:
-    container_name: webui
-    depends_on:
-      - hyphend
-    build:
-      context: /home/smolt/docker
-      dockerfile: Dockerfile.webui
-      additional_contexts:
-        src: /home/smolt/src
-    mem_limit: 4g
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Etc/UTC
-    volumes:
-      - /srv/cluster128k/hy_nginx/hyphen.conf:/config/nginx/site-confs/default.conf
-      - /srv/cluster128k/hy_nginx/include:/config/nginx/include
-    ports:
-      - 80:80
-    networks:
-      - net-api
-      - net-web
     restart: unless-stopped

@@ -1,0 +1,53 @@
+# syntax=docker/dockerfile:1
+
+# Common components shared between mainnet and testnet instances
+
+networks:
+  net-db:
+    name: net-db
+    internal: true
+  net-api:
+    name: net-api
+    internal: true
+  net-web:
+    name: net-web
+    internal: false
+
+services:
+  hy-postgresql:
+    container_name: hy-postgresql
+    image: postgres:18-trixie
+    mem_limit: 20g
+    environment:
+      - TZ=Etc/UTC
+      - POSTGRES_USER=smolt
+      - POSTGRES_PASSWORD=<SUPER-SECRET-PASSWORD-WAHOO-MAR10>
+      - POSTGRES_DB=mainnet
+    volumes:
+      - /srv/cluster8k/hy_postgres:/var/lib/postgresql
+    networks:
+      - net-db
+    restart: unless-stopped
+    command: postgres -c max_wal_size=4GB -c full_page_writes=off -c wal_init_zero=off -c wal_recycle=off
+
+  hy-webui:
+    container_name: hy-webui
+    build:
+      context: /home/smolt/docker
+      dockerfile: Dockerfile.webui
+      additional_contexts:
+        src: /home/smolt/src
+    mem_limit: 4g
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - /srv/cluster128k/hy_nginx/hyphen.conf:/config/nginx/site-confs/default.conf
+      - /srv/cluster128k/hy_nginx/include:/config/nginx/include
+    ports:
+      - 80:80
+    networks:
+      - net-api
+      - net-web
+    restart: unless-stopped
