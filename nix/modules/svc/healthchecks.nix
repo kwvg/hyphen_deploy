@@ -24,8 +24,8 @@ in
     script = ''
       set -u
 
-      web_ret=$(curl -sf -o /dev/null -w "%{http_code}" http://localhost:80/ || echo "000")
-      svc_ret=$(curl -sf -o /dev/null -w "%{http_code}" http://localhost:80/api/v1/status || echo "000")
+      web_ret=$(curl -sf -o /dev/null -w "%{http_code}" -H "Host: ${cfg.healthcheckHost}" http://localhost:80/ || echo "000")
+      svc_ret=$(curl -sf -o /dev/null -w "%{http_code}" -H "Host: ${cfg.healthcheckHost}" http://localhost:80/api/v1/status || echo "000")
       if [ "$web_ret" = "200" ] && [ "$svc_ret" = "200" ]; then
         curl -sf -o /dev/null https://hc-ping.com/${cfg.healthcheckUUID}
       else

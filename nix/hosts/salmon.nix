@@ -8,6 +8,7 @@
     hostname = "salmon";
     username = "smolt";
     hostId = "<I-COULD-REALLY-USE-A-WISH-RIGHT-NOW>";
+    healthcheckHost = "<ARE-LIKE-SHOOTING-STARS>";
     healthcheckUUID = "ebd0a0a2-a7e0-baad-f00d-68b6b72699c7";
     nicName = "<WISH-RIGHT-NOW>";
     sshAuthorizedKeys = [

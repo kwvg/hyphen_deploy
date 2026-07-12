@@ -11,6 +11,7 @@
     nicName = lib.mkOption { type = lib.types.str; };
     addresses = lib.mkOption { type = lib.types.listOf lib.types.str; };
     routes = lib.mkOption { type = lib.types.listOf lib.types.attrs; };
+    healthcheckHost = lib.mkOption { type = lib.types.str; };
     healthcheckUUID = lib.mkOption { type = lib.types.str; };
 
     tunnels.ssh = {
