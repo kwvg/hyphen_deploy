@@ -80,11 +80,14 @@ in
     htop
     iotop
     nano
+    openssl
     postgresql_18
+    pv
     rar
     rsync
     rustup
     tmux
+    wireguard-tools
     zstd
   ];
   nixpkgs.config.allowUnfreePredicate =
