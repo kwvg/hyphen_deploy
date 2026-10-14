@@ -34,7 +34,7 @@ in
     # Spectre/Meltdown mitigations
     "spectre_v2=on"
     "spec_store_bypass_disable=on"
-    "l1tf=full"
+    "l1tf=flush"
     "mds=full"
 
     # Lockdown mode (commented out due to conflict with NixOS)

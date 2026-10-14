@@ -14,8 +14,8 @@ Things you should know:
   MBR with `/boot` as an ext4 partition mirrored using mdadm (RAID1). This is the only thing that's mirrored.
   The MBR is just duplicated and must be done manually if it is updated.
 
-* We assume that the drives are located at `/dev/nvme0n1` and `/dev/nvme1n1`, SMT has been disabled
-  so you only get 4 addressable threads instead of 8. Adjust your scripts accordingly.
+* We assume that the drives are located at `/dev/nvme0n1` and `/dev/nvme1n1`. SMT is enabled, so you
+  get 8 addressable threads. It used to be disabled by `l1tf=full`, see `nix/modules/anssi.nix`.
 
 * To apply the Nix configuration, boot into the Hetzner recovery image (use Hetzner Robot to do that)
   and run `nix run github:nix-community/nixos-anywhere -- --flake ./nix#hostname root@[ip-addr-here]`.
