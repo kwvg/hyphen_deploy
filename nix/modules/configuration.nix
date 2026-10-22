@@ -63,6 +63,8 @@ in
       mdadmConf = "MAILADDR root";
     };
     zfs.devNodes = "/dev/disk/by-id";
+    # Keep pre-26.11 default, pools may be last imported by the rescue OS
+    zfs.forceImportRoot = true;
   };
 
   # Locale and time
